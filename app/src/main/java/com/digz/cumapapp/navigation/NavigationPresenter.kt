@@ -33,12 +33,13 @@ import com.mapzen.valhalla.RouteCallback
 import java.util.*
 
 class NavigationPresenter(private val context: Context) : NavigationContract.Presenter, RouteCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, ResultCallback<Status>, LostApiClient.ConnectionCallbacks {
-    lateinit var mapzenRouter: MapzenRouter
-    lateinit var routeEngine: RouteEngine
+
+    private lateinit var mapzenRouter: MapzenRouter
+    private lateinit var routeEngine: RouteEngine
     private var start: DoubleArray? = null
     private var end: DoubleArray? = null
     private var lostApiClient: LostApiClient? = null
-    private var view: NavigationActivity? = null
+    lateinit var view: NavigationActivity
     private var googleApiClient: GoogleApiClient? = null
     private var adapter: PlaceAutoCompleteAdapter? = null
     private var request: LocationRequest? = null
@@ -46,12 +47,12 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
     private var connectedToMapzen = false
 
 
-    override fun setView(view: NavigationActivity) {
+    override fun onAttach(view: NavigationActivity) {
         this.view = view
     }
 
     private fun startRouting() {
-        mapzenRouter = view!!.router
+        mapzenRouter = view.router
 
         mapzenRouter.setWalking()
         mapzenRouter.setLocation(start)
@@ -59,9 +60,7 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
         mapzenRouter.setCallback(this)
         mapzenRouter.fetch()
         createLostApiClient()
-
     }
-
 
     override fun setStartToNull() {
         if (start != null) start = null
@@ -91,7 +90,6 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
         }
 
         checkLocationSettings()
-
     }
 
     override fun checkLocationSettings() {
@@ -106,14 +104,11 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
         val result = LocationServices.SettingsApi.checkLocationSettings(lostApiClient, settingsRequest)
 
         val locationSettingsResult = result.await()
-        val states = locationSettingsResult.locationSettingsStates
         val status = locationSettingsResult.status
         checkStatusApi(status)
-
-
     }
 
-    fun checkStatusApi(status: com.mapzen.android.lost.api.Status) {
+    private fun checkStatusApi(status: com.mapzen.android.lost.api.Status) {
         when (status.statusCode) {
             com.mapzen.android.lost.api.Status.SUCCESS -> {
                 // All location and BLE settings are satisfied. The client can initialize location
@@ -132,7 +127,7 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
             }
             com.mapzen.android.lost.api.Status.RESOLUTION_REQUIRED ->
                 // Location settings are not satisfied but can be resolved by show the user the Location Settings activity
-                view!!.getResultForLost(status)
+                view.getResultForLost(status)
             com.mapzen.android.lost.api.Status.INTERNAL_ERROR, com.mapzen.android.lost.api.Status.INTERRUPTED, com.mapzen.android.lost.api.Status.TIMEOUT, com.mapzen.android.lost.api.Status.CANCELLED -> {
             }
             else -> {
@@ -158,28 +153,28 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
 
     override fun setUpPlaceAutoCompleteAdapter() {
         adapter = PlaceAutoCompleteAdapter(context, android.R.layout.simple_list_item_1, googleApiClient, BOUNDS_NIGERIA, null)
-        view!!.setPlaceAdapterToView(adapter!!)
+        view.setPlaceAdapterToView(adapter!!)
     }
 
 
     override fun route() {
         if (start == null || end == null) {
             if (start == null) {
-                if (view!!.textOfOriginField.length > 0) {
-                    view!!.setErrorOnOriginTextField("Choose location from dropdown.")
+                if (view.textOfOriginField.isNotEmpty()) {
+                    view.setErrorOnOriginTextField("Choose location from dropdown.")
                 } else {
-                    view!!.showToast("Please choose a starting point.")
+                    view.showToast("Please choose a starting point.")
                 }
             }
             if (end == null) {
-                if (view!!.textOfDestinationField.length > 0) {
-                    view!!.setErrorOnDestinationTextField("Choose location from dropdown.")
+                if (view.textOfDestinationField.isNotEmpty()) {
+                    view.setErrorOnDestinationTextField("Choose location from dropdown.")
                 } else {
-                    view!!.showToast("Please choose a destination.")
+                    view.showToast("Please choose a destination.")
                 }
             }
         } else {
-            view!!.showProgressDialog("Please wait.", "Fetching route information.")
+            view.showProgressDialog("Please wait.", "Fetching route information.")
             startRouting()
         }
     }
@@ -208,6 +203,7 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
 
             end!![0] = place.latLng.latitude
             end!![1] = place.latLng.longitude
+            view.addMapMarker(createMarker(end, false))
         })
     }
 
@@ -234,19 +230,18 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
             start = DoubleArray(2)
             start!![0] = place.latLng.latitude
             start!![1] = place.latLng.longitude
+            view.addMapMarker(createMarker(start, true))
         })
     }
 
     override fun success(route: Route) {
-        view!!.dismissProgressDialog()
-        view!!.showToast("route info success")
-        view!!.setStartTripVisibility(View.VISIBLE)
-        view!!.addMapMarker(createMarker(start, true))
-        view!!.addMapMarker(createMarker(end, false))
+        view.dismissProgressDialog()
+        view.showToast("route info success")
+        view.setStartTripVisibility(View.VISIBLE)
         val center = CameraUpdateFactory.newLatLng(LatLng(start!![0], start!![1]))
         val zoom = CameraUpdateFactory.zoomTo(16f)
-        view!!.centerCamera(center)
-        view!!.zoomCamera(zoom)
+        view.centerCamera(center)
+        view.zoomCamera(zoom)
         createPolyline(route)
         listenerForRoute(route)
     }
@@ -263,7 +258,7 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
             val point = LatLng(latitude, longitude)
             polylineOptions.add(point)
         }
-        view!!.drawOnMap(polylineOptions)
+        view.drawOnMap(polylineOptions)
     }
 
     private fun createMarker(position: DoubleArray?, startMarker: Boolean): MarkerOptions {
@@ -277,10 +272,9 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
     }
 
     override fun failure(statusCode: Int) {
-        view!!.dismissProgressDialog()
-        view!!.showToast("Error getting route info")
+        view.dismissProgressDialog()
+        view.showToast("Error getting route info")
     }
-
 
     private fun listenerForRoute(route: Route) {
         val routeListener = object : RouteListener {
@@ -314,7 +308,7 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
 
             }
         }
-        routeEngine = view!!.routeEngine
+        routeEngine = view.routeEngine
         routeEngine.setListener(routeListener)
         routeEngine.route = route
 
@@ -344,12 +338,12 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
 
     override fun onConnected() {
         connectedToMapzen = true
-        view!!.showToast("Connected successfully")
+        view.showToast("Connected successfully")
     }
 
     override fun onConnectionSuspended() {
         connectedToMapzen = false
-        view!!.showToast("Connected suspended")
+        view.showToast("Connected suspended")
     }
 
     override fun setAdapterBounds(bounds: LatLngBounds) {
@@ -360,6 +354,5 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
         private val LOG_TAG = "MyActivity"
         private val BOUNDS_NIGERIA = LatLngBounds(LatLng(5.065341647205726, 2.9987719580531),
                 LatLng(9.9, 5.9))
-        private val COLORS = intArrayOf(R.color.colorPrimaryDark, R.color.colorPrimary, R.color.colorPrimaryLight, R.color.colorAccent, R.color.primary_dark_material_light)
     }
 }

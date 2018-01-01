@@ -29,9 +29,9 @@ interface NavigationContract {
 
         fun setStartTripVisibility(visibility: Int)
 
-        fun setErrorOnOriginTextField(textField: String)
+        fun setErrorOnOriginTextField(error: String?)
 
-        fun setErrorOnDestinationTextField(textField: String)
+        fun setErrorOnDestinationTextField(error: String?)
 
         fun setPlaceAdapterToView(adapter: PlaceAutoCompleteAdapter)
 
@@ -48,7 +48,7 @@ interface NavigationContract {
     }
 
     interface Presenter {
-        fun setView(view: NavigationActivity)
+        fun onAttach(view: NavigationActivity)
 
         fun setStartToNull()
 
