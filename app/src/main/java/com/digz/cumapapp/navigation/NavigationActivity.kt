@@ -1,6 +1,5 @@
 package com.digz.cumapapp.navigation
 
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
@@ -25,7 +24,6 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
 
     lateinit var presenter: NavigationPresenter
 
-    private var progressDialog: ProgressDialog? = null
     private var map: GoogleMap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,18 +32,17 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
         router
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         presenter = NavigationPresenter(this)
-        presenter.setView(this)
+        presenter.onAttach(this)
         presenter.setupGoogleServices()
         setupMaps()
 
 
-        startTrip.setOnClickListener(this);
-        send.setOnClickListener(this);
+        startTrip.setOnClickListener(this)
+        send.setOnClickListener(this)
         setClickListeners()
 
-        setTextWatchers();
+        setTextWatchers()
 
-        progressDialog = ProgressDialog(this)
     }
 
     private fun setTextWatchers() {
@@ -61,7 +58,7 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
             }
 
             override fun onTextChanged(s: CharSequence, startNum: Int, before: Int, count: Int) {
-                presenter.setStartToNull();
+                presenter.setStartToNull()
 
             }
 
@@ -76,7 +73,7 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                presenter.setEndToNull();
+                presenter.setEndToNull()
 
 
             }
@@ -90,18 +87,14 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
     }
 
     private fun setClickListeners() {
-        /*
-        * Sets the start and destination points based on the values selected
-        * from the autocomplete text views.
-        * */
-        startAutoComplete.setOnItemClickListener { parent, view, position, id ->
+        startAutoComplete.setOnItemClickListener { _, _, position, _ ->
 
-            presenter.onStartAutocompleteClicked(position);
+            presenter.onStartAutocompleteClicked(position)
 
         }
 
-        endAutoComplete.setOnItemClickListener { parent, view, position, id ->
-            presenter.onDestinationAutocompleteClicked(position);
+        endAutoComplete.setOnItemClickListener { _, _, position, _ ->
+            presenter.onDestinationAutocompleteClicked(position)
 
         }
 
@@ -121,20 +114,19 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
                 Toast.makeText(this, "No internet connectivity", Toast.LENGTH_SHORT).show()
             }
             R.id.startTrip -> {
-                progressDialog!!.show()
+                progress_bar.visibility = View.VISIBLE
                 presenter.startTrip()
             }
         }
     }
 
     override fun showProgressDialog(title: String, message: String) {
-        progressDialog!!.setTitle(title)
-        progressDialog!!.setMessage(message)
-        progressDialog!!.show()
+        progress_bar.visibility = View.VISIBLE
+
     }
 
     override fun dismissProgressDialog() {
-        progressDialog!!.dismiss()
+        progress_bar.visibility = View.GONE
     }
 
 
@@ -143,9 +135,8 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
     }
 
     override fun setStartTripVisibility(visibility: Int) {
-        startTrip.setVisibility(visibility);
+        startTrip.visibility = visibility
     }
-
 
     override fun onMapReady(map: GoogleMap) {
         this.map = map
@@ -163,9 +154,8 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
     }
 
     override fun setPlaceAdapterToView(adapter: PlaceAutoCompleteAdapter) {
-        startAutoComplete.setAdapter(adapter);
-        endAutoComplete.setAdapter(adapter);
-
+        startAutoComplete.setAdapter(adapter)
+        endAutoComplete.setAdapter(adapter)
     }
 
     override fun getResultForLost(status: Status) {
@@ -177,12 +167,12 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
 
     }
 
-    override fun setErrorOnOriginTextField(error: String) {
-        startAutoComplete.setError(error);
+    override fun setErrorOnOriginTextField(error: String?) {
+        startAutoComplete.setError(error)
     }
 
-    override fun setErrorOnDestinationTextField(error: String) {
-        endAutoComplete.setError(error);
+    override fun setErrorOnDestinationTextField(error: String?) {
+        endAutoComplete.setError(error)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {

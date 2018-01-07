@@ -158,25 +158,46 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
 
 
     override fun route() {
-        if (start == null || end == null) {
-            if (start == null) {
-                if (view.textOfOriginField.isNotEmpty()) {
-                    view.setErrorOnOriginTextField("Choose location from dropdown.")
-                } else {
-                    view.showToast("Please choose a starting point.")
-                }
-            }
-            if (end == null) {
-                if (view.textOfDestinationField.isNotEmpty()) {
-                    view.setErrorOnDestinationTextField("Choose location from dropdown.")
-                } else {
-                    view.showToast("Please choose a destination.")
-                }
-            }
-        } else {
-            view.showProgressDialog("Please wait.", "Fetching route information.")
-            startRouting()
+        if (!validateStart() || !validateEnd()) return
+
+        view.showProgressDialog("Please wait.", "Fetching route information.")
+        view.showToast("Please wait. Fetching route information.")
+        startRouting()
+    }
+
+    private fun validateEnd(): Boolean {
+        val state = end != null
+        if (end != null) {
+            view.setErrorOnDestinationTextField(null)
         }
+
+        if (view.textOfDestinationField.isNotEmpty()) {
+            view.setErrorOnOriginTextField("Choose location from dropdown.")
+
+        } else {
+            view.setErrorOnDestinationTextField("Please type in a destination.")
+            view.showToast("Please choose a destination.")
+
+        }
+        return state
+    }
+
+    private fun validateStart(): Boolean {
+        val state = start != null
+        if (start != null) {
+            view.setErrorOnOriginTextField(null)
+        }
+
+        if (view.textOfOriginField.isNotEmpty()) {
+            view.setErrorOnOriginTextField("Choose location from dropdown.")
+
+        } else {
+            view.setErrorOnOriginTextField("Please type in a starting point.")
+            view.showToast("Please choose a starting point.")
+
+        }
+        return state
+
     }
 
     override fun onDestinationAutocompleteClicked(position: Int) {
