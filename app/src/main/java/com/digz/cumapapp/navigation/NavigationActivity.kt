@@ -11,10 +11,7 @@ import android.widget.Toast
 import com.digz.cumapapp.R
 import com.digz.cumapapp.adapter.PlaceAutoCompleteAdapter
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
 import com.mapzen.android.lost.api.Status
 import com.mapzen.android.routing.MapzenRouter
 import com.mapzen.helpers.RouteEngine
@@ -141,16 +138,12 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
     override fun onMapReady(map: GoogleMap) {
         this.map = map
         presenter.setUpPlaceAutoCompleteAdapter()
-        map.setOnCameraChangeListener {
-            val bounds = this@NavigationActivity.map!!.projection.visibleRegion.latLngBounds
-            presenter.setAdapterBounds(bounds)
-        }
 
-        val center = CameraUpdateFactory.newLatLng(LatLng(6.667876, 3.151196))
-        val zoom = CameraUpdateFactory.zoomTo(8f)
+        val CU = LatLngBounds(LatLng(0.0, 0.0), LatLng(0.0, 0.0))
 
-        map.moveCamera(center)
-        map.animateCamera(zoom)
+        map.setLatLngBoundsForCameraTarget(CU)
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(CU, 0))
+        presenter.setAdapterBounds(CU)
     }
 
     override fun setPlaceAdapterToView(adapter: PlaceAutoCompleteAdapter) {

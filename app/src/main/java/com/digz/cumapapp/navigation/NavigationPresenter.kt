@@ -156,7 +156,6 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
         view.setPlaceAdapterToView(adapter!!)
     }
 
-
     override fun route() {
         if (!validateStart() || !validateEnd()) return
 
