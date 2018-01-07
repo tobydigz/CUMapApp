@@ -6,9 +6,6 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
-import com.mapzen.android.lost.api.Status
-import com.mapzen.android.routing.MapzenRouter
-import com.mapzen.helpers.RouteEngine
 
 interface NavigationContract {
     interface View {
@@ -16,10 +13,6 @@ interface NavigationContract {
         val textOfOriginField: String
 
         val textOfDestinationField: String
-
-        val router: MapzenRouter
-
-        val routeEngine: RouteEngine
 
         fun showProgressDialog(title: String, message: String)
 
@@ -34,8 +27,6 @@ interface NavigationContract {
         fun setErrorOnDestinationTextField(error: String?)
 
         fun setPlaceAdapterToView(adapter: PlaceAutoCompleteAdapter)
-
-        fun getResultForLost(status: Status)
 
         fun centerCamera(center: CameraUpdate)
 
@@ -67,8 +58,6 @@ interface NavigationContract {
         fun onDestinationAutocompleteClicked(position: Int)
 
         fun onStartAutocompleteClicked(position: Int)
-
-        fun createLostApiClient()
 
         fun checkLocationSettings()
 

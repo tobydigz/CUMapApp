@@ -1,7 +1,6 @@
 package com.digz.cumapapp.navigation
 
 import android.content.Intent
-import android.content.IntentSender
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
@@ -12,9 +11,6 @@ import com.digz.cumapapp.R
 import com.digz.cumapapp.adapter.PlaceAutoCompleteAdapter
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
-import com.mapzen.android.lost.api.Status
-import com.mapzen.android.routing.MapzenRouter
-import com.mapzen.helpers.RouteEngine
 import kotlinx.android.synthetic.main.activity_direction.*
 
 class NavigationActivity : AppCompatActivity(), View.OnClickListener, NavigationContract.View, OnMapReadyCallback {
@@ -26,7 +22,6 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_direction)
-        router
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         presenter = NavigationPresenter(this)
         presenter.onAttach(this)
@@ -151,15 +146,6 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
         endAutoComplete.setAdapter(adapter)
     }
 
-    override fun getResultForLost(status: Status) {
-        try {
-            status.startResolutionForResult(this, REQUEST_CHECK_SETTINGS)
-        } catch (e: IntentSender.SendIntentException) {
-            e.printStackTrace()
-        }
-
-    }
-
     override fun setErrorOnOriginTextField(error: String?) {
         startAutoComplete.setError(error)
     }
@@ -199,11 +185,6 @@ class NavigationActivity : AppCompatActivity(), View.OnClickListener, Navigation
         get() = startAutoComplete.getText().toString()
     override val textOfDestinationField: String
         get() = endAutoComplete.getText().toString()
-    override val router: MapzenRouter
-        get() = MapzenRouter(this/*, "mapzen-4DXdxtn"*/)
-    override val routeEngine: RouteEngine
-        get() = RouteEngine()
-
 
     companion object {
 

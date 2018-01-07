@@ -33,7 +33,6 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:11.8.0'
     implementation 'com.google.android.gms:play-services-location:11.8.0'
     implementation 'com.google.android.gms:play-services-places:11.8.0'
-    implementation 'com.mapzen:mapzen-android-sdk:1.6.1'
     implementation ('com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.8.0') {
         transitive = true
     }
