@@ -1,7 +1,9 @@
 package com.digz.cumapapp.navigation
 
 
+import android.Manifest
 import android.content.Context
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import com.digz.cumapapp.R
@@ -16,6 +18,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
+import com.mapbox.geojson.Point
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions
+import com.tedpark.tedpermission.rx2.TedRx2Permission
+import io.reactivex.rxkotlin.subscribeBy
+
 
 class NavigationPresenter(private val context: Context) : NavigationContract.Presenter, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, ResultCallback<Status> {
 
@@ -32,6 +39,27 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
     }
 
     private fun startRouting() {
+
+        val origin = Point.fromLngLat(start!![1], start!![0])
+        val destination = Point.fromLngLat(end!![1], end!![0])
+
+        val options = NavigationViewOptions.builder()
+                .origin(origin)
+                .destination(destination)
+                .shouldSimulateRoute(false)
+                .build()
+
+        TedRx2Permission.with(context)
+                .setRationaleTitle("Location Permission Required")
+                .setRationaleMessage(R.string.permission_rationale_location) // "we need permission for read contact and find your location"
+                .setPermissions(Manifest.permission.ACCESS_FINE_LOCATION)
+                .request()
+                .filter { it.isGranted }
+                .subscribeBy(onError = {}, onNext = {
+                    view.startNavigation(options)
+                })
+
+
     }
 
     override fun setStartToNull() {
@@ -77,7 +105,8 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
     }
 
     override fun route() {
-        if (!validateStart() || !validateEnd()) return
+        if (!validateStart()) return
+        if (!validateEnd()) return
 
         view.showProgressDialog("Please wait.", "Fetching route information.")
         view.showToast("Please wait. Fetching route information.")
@@ -88,6 +117,7 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
         val state = end != null
         if (end != null) {
             view.setErrorOnDestinationTextField(null)
+            return state
         }
 
         if (view.textOfDestinationField.isNotEmpty()) {
@@ -105,6 +135,7 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
         val state = start != null
         if (start != null) {
             view.setErrorOnOriginTextField(null)
+            return state
         }
 
         if (view.textOfOriginField.isNotEmpty()) {
@@ -202,12 +233,17 @@ class NavigationPresenter(private val context: Context) : NavigationContract.Pre
     }
 
     override fun setAdapterBounds(bounds: LatLngBounds) {
-        adapter!!.setBounds(BOUNDS_NIGERIA)
+        adapter!!.setBounds(bounds)
+    }
+
+    override fun setStart(location: Location) {
+        start = DoubleArray(2)
+        start!![0] = location.latitude
+        start!![1] = location.longitude
     }
 
     companion object {
         private val LOG_TAG = "MyActivity"
-        private val BOUNDS_NIGERIA = LatLngBounds(LatLng(5.065341647205726, 2.9987719580531),
-                LatLng(9.9, 5.9))
+        private val BOUNDS_NIGERIA = LatLngBounds(LatLng(6.563810, 3.065035), LatLng(6.674764, 3.252332))
     }
 }

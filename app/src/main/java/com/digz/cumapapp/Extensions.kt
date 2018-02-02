@@ -11,3 +11,7 @@ fun Address.getTextualAddress():String{
     }
     return builder.toString()
 }
+
+object MAPBOX{
+    val KEY = "pk.eyJ1IjoidG9ieWRpZ3oiLCJhIjoiY2l3MTExM3JqMDA0YTJ5cTkxcXJiNzQ3NSJ9.OL1zvr8Hb6HbKPq01CEwsg"
+}

@@ -1,11 +1,13 @@
 package com.digz.cumapapp.navigation
 
+import android.location.Location
 import com.digz.cumapapp.adapter.PlaceAutoCompleteAdapter
 import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions
 
 interface NavigationContract {
     interface View {
@@ -34,7 +36,11 @@ interface NavigationContract {
 
         fun drawOnMap(polylineOptions: PolylineOptions): Polyline
 
+        fun setStartAutoCompleteText()
+
         fun addMapMarker(markerOptions: MarkerOptions)
+
+        fun startNavigation(options:NavigationViewOptions)
 
     }
 
@@ -44,6 +50,8 @@ interface NavigationContract {
         fun setStartToNull()
 
         fun setEndToNull()
+
+        fun setStart(location:Location)
 
         fun determineIfOnline(): Boolean
 
